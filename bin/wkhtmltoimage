@@ -7,15 +7,18 @@ host_os = RbConfig::CONFIG['host_os']
 arch = if host_os =~ /darwin/
          'darwin-x64'
        elsif host_os =~ /linux/
-         # Check for Ubuntu Jammy (22.04)
-         if File.exist?('/etc/os-release') && File.read('/etc/os-release').include?('jammy')
-           'jammy'
-         else
-           'rocky9'
-         end
-       else
-         'rocky9'
+         # Check for specific Linux distributions
+         if File.exist?('/etc/os-release')
+           os_release = File.read('/etc/os-release')
+           if os_release.include?('jammy')
+             'jammy'
+           elsif os_release.include?('bullseye')
+             'bullseye'
+           end
+        end
        end
+
+arch ||= 'rocky9'
 
 args = $*.map { |x| x.include?(' ') ? "'" + x + "'" : x }
 cmd = File.expand_path "#{File.dirname(__FILE__)}/../libexec/wkhtmltoimage-#{arch}"
